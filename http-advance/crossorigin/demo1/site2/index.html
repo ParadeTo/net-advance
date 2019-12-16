@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script>
+      const $div = document.querySelector('#content')
+      window
+        .fetch({
+          url: 'http://localhost:3000/test1',
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+          $div.innerHTML = data.name
+        })
+        .catch(console.error)
+    </script>
+  </body>
+</html>

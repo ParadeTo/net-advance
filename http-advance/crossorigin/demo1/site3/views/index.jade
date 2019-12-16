@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  p#content Welcome to #{title}
+  script.
+    const $div = document.querySelector('#content')
+    window
+      .fetch('http://localhost:3000/test1',{
+        //- url: '',
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'myheader': 'ddd'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        $div.innerHTML = data.name
+      })
+      .catch(console.error)
+
+    //- const xhr = new XMLHttpRequest();
+    //- xhr.open('GET', 'http://localhost:3000/test1', true);
+    //- xhr.withCredentials = true;
+    //- xhr.send(null);
