@@ -1,4 +1,4 @@
 **/node_modules
 **/*.iso
-**/*.img
+**/*.dmg
 **/downloads/*
