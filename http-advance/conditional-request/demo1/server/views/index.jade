@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  script.
+    async function getData() {
+      return fetch('/test')
+    }
+
+    async function postData() {
+      return fetch('/test', { method: 'POST' })
+    }
+
+    async function run () {
+      await getData()
+      await getData()
+      await postData()
+    }
+
+    run()
+
