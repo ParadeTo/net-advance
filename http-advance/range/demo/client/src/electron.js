@@ -1,6 +1,6 @@
 const electron = require('electron')
 const {ipcMain} = require('electron')
-const { download, getFiles } = require('./src/download')
+const Downloader = require('./download')
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
 
@@ -44,15 +44,22 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.on('download', (event, args) => {
-  console.log('download')
-  console.log(args)
-  download(args)
+const downloadMap = {}
+ipcMain.on('download', (event, filename) => {
+  if (!downloadMap[filename]) {
+    const downloader = new Downloader(filename)
+    downloader.download()
+    downloader.on('progress', ({ payload: { loaded } }) => {
+      console.log('progress', loaded)
+      event.sender.send('progress', { filename: downloader.filename, loaded })
+    })
+    downloadMap[filename] = downloader
+  }
 })
 
 ipcMain.on('getFiles', async (event) => {
   try {
-    const files = await getFiles()
+    const files = await Downloader.getFiles()
     event.sender.send('getFilesSucc', files)
   } catch (error) {
     console.error(error)

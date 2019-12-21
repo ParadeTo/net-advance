@@ -24,11 +24,15 @@ function App() {
     ipcRenderer.on('getFilesSucc', (sender, data) => {
       setFiles(JSON.parse(data))
     })
+    ipcRenderer.on('progress', (sender, { filename, loaded }) => {
+      console.log(filename, loaded)
+    })
   }, [])
 
   const download = useCallback(filename => {
     ipcRenderer.send('download', filename)
   }, [])
+
   return (
     <div className='App'>
       <List
@@ -44,7 +48,7 @@ function App() {
               description={formatSize(item.size)}
             />
             <div style={{width: '500px'}}>
-              <Button type='primary' style={{marginRight: '50px'}} onClick={() => download(item)}>
+              <Button type='primary' style={{marginRight: '50px'}} onClick={() => download(item.filename)}>
                 下载
               </Button>
               <Button>停止</Button>

@@ -1,4 +1,4 @@
-export default class Event {
+module.exports = class Event {
   listeners = {}
   on(type, cb) {
     if (Array.isArray(type)) {
