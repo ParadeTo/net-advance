@@ -12,7 +12,7 @@ module.exports = class Event {
   }
 
   once(type, cb) {
-    const on = (action) => {
+    const on = action => {
       this.off(type, on)
       cb.call(this, action)
     }
@@ -57,7 +57,7 @@ module.exports = class Event {
   }
 
   emit(action) {
-    const { type } = action
+    const {type} = action
     let cbs = this.listeners[type]
     if (cbs) {
       for (let i = 0, l = cbs.length; i < l; i++) {

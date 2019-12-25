@@ -28,7 +28,8 @@ module.exports = class Downloader extends Event {
             body += data
           })
           res.on('end', function() {
-            resolve(body)
+            const handledData = Downloader.fillFilesWithLoadedField(body)
+            resolve(handledData)
           })
           res.on('error', reject)
         }
@@ -37,11 +38,46 @@ module.exports = class Downloader extends Event {
     })
   }
 
+  static fillFilesWithLoadedField(data) {
+    try {
+      const json = JSON.parse(data)
+      return json.map(file => {
+        const fullFilename = path.resolve(downloadPath, file.filename)
+        let loaded = 0
+        if (fs.existsSync(fullFilename)) {
+          const {size} = fs.statSync(fullFilename)
+          loaded = size
+        }
+        return {
+          ...file,
+          loaded
+        }
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   stop() {
-    this.req.close()
+    this.off('data')
+  }
+
+  onReceiveData({payload: {fd, data, loaded, total}}) {
+    fs.write(fd, data, () => {
+      this.emit({
+        type: 'progress',
+        payload: {
+          data,
+          loaded,
+          total
+        }
+      })
+    })
   }
 
   download() {
+    this.on('data', this.onReceiveData)
+
     const me = this
     let rangeStart = 0
     let size = 0
@@ -66,13 +102,21 @@ module.exports = class Downloader extends Event {
         },
         res => {
           res.on('data', function(data) {
-            console.log('data', data.length)
-            fs.write(fd, data, () => {
-              downloadedSize += data.length
-              me.emit({ type: 'progress', payload: { loaded: downloadedSize } })
+            downloadedSize += data.length
+            me.emit({
+              type: 'data',
+              payload: {
+                fd,
+                data,
+                loaded: downloadedSize,
+                total: +res.headers['content-range'].split('/')[1]
+              }
             })
           })
-          res.on('end', function() {
+          res.on('end', function(err) {
+            if (err) {
+              console.error(err)
+            }
             console.log(`Download ${me.filename} end.`)
             resolve()
           })
@@ -80,7 +124,6 @@ module.exports = class Downloader extends Event {
         }
       )
       req.end()
-      this.req = req
     })
   }
 }

@@ -46,14 +46,22 @@ app.on('activate', () => {
 
 const downloadMap = {}
 ipcMain.on('download', (event, filename) => {
-  if (!downloadMap[filename]) {
-    const downloader = new Downloader(filename)
-    downloader.download()
-    downloader.on('progress', ({ payload: { loaded } }) => {
-      console.log('progress', loaded)
-      event.sender.send('progress', { filename: downloader.filename, loaded })
+  try {
+    if (!downloadMap[filename]) {
+      downloadMap[filename] = new Downloader(filename)
+    }
+    downloadMap[filename].download()
+    downloadMap[filename].on('progress', ({ payload: { loaded, total } }) => {
+      event.sender.send('progress', { filename, loaded, total })
     })
-    downloadMap[filename] = downloader
+  } catch (error) {
+    console.error(error)
+  }
+})
+
+ipcMain.on('stop', (event, filename) => {
+  if (downloadMap[filename]) {
+    downloadMap[filename].stop()
   }
 })
 

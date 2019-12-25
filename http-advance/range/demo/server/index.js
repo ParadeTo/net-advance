@@ -29,7 +29,7 @@ app.head('/:filename', (req, res) => {
   res.end()
 })
 
-app.get('/:filename', (req, res) => {
+app.get('/:filename', async (req, res) => {
   const fullFilename = resolveFilename(req.params.filename)
   const range = req.headers['range']
   const {size} = fs.statSync(fullFilename)
@@ -55,6 +55,7 @@ app.get('/:filename', (req, res) => {
   // }
   // console.log(buffer.length)
   // res.end()
+  res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
 
   const readStream = fs.createReadStream(fullFilename, {start, end})
   readStream.pipe(res)
