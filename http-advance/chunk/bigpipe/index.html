@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+      var Bigpipe = function() {
+        this.callbacks = {}
+      }
+      Bigpipe.prototype.ready = function(key, callback) {
+        if (!this.callbacks[key]) {
+          this.callbacks[key] = []
+        }
+        this.callbacks[key].push(callback)
+      }
+      Bigpipe.prototype.set = function(key, data) {
+        var callbacks = this.callbacks[key] || []
+        for (var i = 0; i < callbacks.length; i++) {
+          callbacks[i].call(this, data)
+        }
+      }
+    </script>
+    <script>
+      var bigpipe = new Bigpipe()
+      bigpipe.ready('personInfo', function(data) {
+        for (let k in data) {
+          const $ele = document.querySelector('#' + k)
+          $ele.innerHTML = data[k]
+        }
+      })
+      bigpipe.ready('articles', function(data) {
+        const $ele = document.querySelector('#articles')
+        let html = ''
+        data.forEach(article => {
+          html += `<li>${article.title}</li>`
+        })
+        $ele.innerHTML = html
+      })
+    </script>
+  </head>
+  <body>
+    <h1>个人信息</h1>
+    <p>姓名：<span id="name"></span></p>
+    <p>年龄：<span id="age"></span></p>
+    <p>性别：<span id="gender"></span></p>
+    <h1>文章列表</h1>
+    <ul id="articles"></ul>
+  </body>
+</html>

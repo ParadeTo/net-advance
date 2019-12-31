@@ -1,0 +1,1 @@
+openresty -c /Users/youxingzhi/ayou/net-advance/http-advance/range/nginx/nginx.conf
